@@ -1,4 +1,4 @@
-OpenRPG is yet another open source text based role playing game. OpenRPG is written in PHP.
+OpenRPG is yet another open source text based role-playing game framework. OpenRPG is written in PHP.
 
 The project has just started. As such, the only portion under development is the database.
 
@@ -9,3 +9,4 @@ Including stored procedures, indexes, views, triggers, etc.
 Creation of config.php and base configuration
 Creation of PHP classes to interface with database
 Web Interface
+Sample game data
