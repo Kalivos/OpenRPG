@@ -4,7 +4,7 @@ class Setup
 {
 
 	//test if we can connect to the database
-	function dbTest($dbhost, $dbuser, $dbpass, $dbname, $dbport="3600")
+	function dbTest($dbhost, $dbuser, $dbpass, $dbname, $dbport="3306")
 	{
 		$status = false;
 	
@@ -27,7 +27,7 @@ class Setup
 	}
 	
 	//setup the database
-	function dbSetup($dbhost, $dbuser, $dbpass, $dbname, $dbport="3600")
+	function dbSetup($dbhost, $dbuser, $dbpass, $dbname, $dbport="3306")
 	{
 		$conn = mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass) or die("Error connecting to database. ".mysql_error());
 		mysql_select_db($dbname, $conn) or die("Error selecting database. ".mysql_error());
