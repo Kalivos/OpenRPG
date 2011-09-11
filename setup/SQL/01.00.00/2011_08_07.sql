@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS `openRPG`;
-USE `openRPG`;
-
 /*Table structure for table `banned` */
 
 CREATE TABLE `banned` (
