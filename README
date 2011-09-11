@@ -1,11 +1,22 @@
-OpenRPG is an open source text based role-playing game framework. OpenRPG is written in PHP and released under GPL(v3).
+-About-
+OpenRPG is an open source text based role-playing game framework.
+OpenRPG is written in PHP and released under GPL(v3).
 
+-Documentation-
+All documentation can be found under the "docs" directory.
 The database diagram can be modified and viewed with Dia. For convenience, it has also been exported as a jpg image.
-jQuery is being used to provide ajax functionality. The jQuery file is not distributed with this project, but rather imported from googleapis (https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js)
 
-If you are looking to contribute, here are some areas that would benefit:
-Database scripts
-Creation of config.php and base configuration
-Creation of PHP classes to interface with database
+-Areas looking for Contributions-
 Web Interface
 Sample game data
+Spelling and grammar checking in game data as well as documentation
+
+-Requirements-
+Please let me know if it works with lower requirements.
+PHP 5 or later
+MySQL 4 or later
+
+-Installation-
+Place all files into a web directory.
+In your web browser, navigate to the setup folder (http://www.example.com/setup).
+Follow the web based installer until setup is complete.
