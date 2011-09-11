@@ -7,7 +7,7 @@ class Setup
 	//Returns an array of directories in ascending order
 	private function dir_list($dir)
 	{
-		$list = new array();
+		$list = array();
 		foreach(array_diff(scandir($dir),array('.','..')) as $file)
 		{
 			if(is_dir($dir.'/'.$file))
@@ -22,19 +22,16 @@ class Setup
 	function dbTest($dbhost, $dbuser, $dbpass, $dbname, $dbport="3306")
 	{
 		$status = false;
-	
-		$conn = mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass);
-		
-		if($conn)
+		$conn = @mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass);
+		if($conn != "")
 		{
-			if(mysql_select_db($dbname, $conn))
-			{
+			//if(mysql_select_db($dbname, $conn))
+			//{
 				$status = true;
-			}
+			//}
 			
 			mysql_close($conn);
 		}
-		
 		return $status;
 	}
 	
@@ -45,55 +42,79 @@ class Setup
 		$db_minor = 00;
 		$db_build = 00;
 		$installed = "01/01/2010";
+		$scriptDate = "";
 		
 		require_once($this->configFile);
 
-		$conn = mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass);
+		$conn = mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass) or die("Error connecting to database: ".mysql_error());
 		
 		if($conn)
 		{
+			//If it doesn't exist, let's create the database
+			mysql_query("CREATE DATABASE IF NOT EXISTS ".$dbname, $conn);
 			mysql_select_db($dbname, $conn);
 			
-			$result = mysql_query("SELECT major, minor, build, installed FROM version ORDER BY installed DESC, LIMIT 1");
+			$result = mysql_query("SELECT major, minor, build, installed FROM `version` ORDER BY installed DESC LIMIT 1");
 			
-			while ($row = mysql_fetch_array($result, MYSQL_ASSOC))
+			if($result != false)
 			{
-				$db_major = $row['major'];
-				$db_minor = $row['minor'];
-				$db_build = $row['build'];
-				$installed = $row['installed'];
+				while ($row = mysql_fetch_array($result, MYSQL_ASSOC))
+				{
+					$db_major = $row['major'];
+					$db_minor = $row['minor'];
+					$db_build = $row['build'];
+					$installed = $row['installed'];
+				}
+				
+				mysql_free_result($result);	
 			}
-			
-			mysql_free_result($result);	
 		}
 		
 		//Files will be located under SQL directory followed by version number and finally, patch date.
 		//Example: SQL/01.00.00/2011.08.03
 		//Files will be sorted ascending order and will be processed in that fashion
-		//Latest version number and date of last update will be stored in database
-		$db_version = $db_major . $db_minor . $db_build;
-		foreach(dir_list("SQL") as $version)
-		{				
-			if($db_version <= $version)
+		//Latest version number and date of last update will be stored in database		
+		$db_version = str_pad($db_major,2,'0',STR_PAD_LEFT) . str_pad($db_minor,2,'0',STR_PAD_LEFT) . str_pad($db_build,2,'0',STR_PAD_LEFT);
+		
+		foreach($this->dir_list("SQL") as $version)
+		{			
+			$transform = array("." => "");	
+			if($db_version <= strtr($version, $transform))
 			{ 
-				//get all SQL files with a .sql extension.
-				$updates = glob("SQL/".$version. "/*.sql");
+				//used when saving the last version
+				list($db_major, $db_minor, $db_build) = explode(".", $version);
 				
-				foreach($updates as $updateScript)
+				//get all SQL files with a .sql extension.
+				foreach( glob("SQL/".$version. "/*.sql") as $updateScript)
 				{
-					if($updateScript > $installed )
+					$scriptDate = split("/", $updateScript);
+					$scriptDate = substr($scriptDate[2], 0, strrpos($scriptDate[2], "."));
+					$scriptDate = str_replace("_", "/", $scriptDate);
+
+					if(strtotime($scriptDate) > strtotime($installed) )
 					{
-						mysql_query("SOURCE SQL/".$version."/".$updateScript) or die("Error setting up database.<br />\nFile: SQL/".$version."/".$updateScript."<br />\n".mysql_error());
+						$updateSource = split(";", file_get_contents($updateScript));
+						
+						//we originally used SOURCE / LOAD DATA, but ran into problems with shared hosting services disabling commands
+						//New process is to read in every file and execute each command in the file through mysql_query();
+						//longer process, but more reliable.
+						foreach($updateSource as $source)
+						{
+							$source = trim($source);
+							if( $source != "")
+							{
+								mysql_query($source) or die("Error setting up database.<br />\nFile: ".$updateScript."<br />\n".mysql_error());
+							}
+						}
+						
+						mysql_query("INSERT INTO `version` (installed, major, minor, build) VALUES ('$scriptDate', $db_major, $db_minor, $db_build)");	
 					}
 				}
+				
+				//now that the sql file has been sourced, it is the latest version
+				$db_version = $version;
 			}
-			
-			//now that the sql file has been sourced, it is the latest version
-			$db_version = $version;
 		}
-		
-		list($major, $minor, $build) = explode($db_version);
-		mysql_query("INSERT INTO version (installed, major, minor, build) VALUES (CURRENT_DATE(), $major, $minor, $build)");
 		
 		mysql_close($conn);	
 	}
