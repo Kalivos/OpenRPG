@@ -87,13 +87,13 @@ class Setup
 				//get all SQL files with a .sql extension.
 				foreach( glob("SQL/".$version. "/*.sql") as $updateScript)
 				{
-					$scriptDate = split("/", $updateScript);
+					$scriptDate = explode("/", $updateScript);
 					$scriptDate = substr($scriptDate[2], 0, strrpos($scriptDate[2], "."));
 					$scriptDate = str_replace("_", "/", $scriptDate);
 
 					if(strtotime($scriptDate) > strtotime($installed) )
 					{
-						$updateSource = split(";", file_get_contents($updateScript));
+						$updateSource = explode(";", file_get_contents($updateScript));
 						
 						//we originally used SOURCE / LOAD DATA, but ran into problems with shared hosting services disabling commands
 						//New process is to read in every file and execute each command in the file through mysql_query();
