@@ -22,10 +22,10 @@ class Setup
 	function dbTest($dbhost, $dbuser, $dbpass, $dbname, $dbport="3306")
 	{
 		$status = false;
-		$conn = @mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass);
+		$conn = @mysqli_connect($dbhost.":".$dbport, $dbuser, $dbpass);
 		if($conn != "")
 		{
-			//if(mysql_select_db($dbname, $conn))
+			//if(mysqli_select_db($dbname, $conn))
 			//{
 				$status = true;
 			//}
@@ -46,19 +46,19 @@ class Setup
 		
 		require_once($this->configFile);
 
-		$conn = mysql_connect($dbhost.":".$dbport, $dbuser, $dbpass) or die("Error connecting to database: ".mysql_error());
+		$conn = mysqli_connect($dbhost.":".$dbport, $dbuser, $dbpass) or die("Error connecting to database: ".mysqli_error());
 		
 		if($conn)
 		{
 			//If it doesn't exist, let's create the database
-			mysql_query("CREATE DATABASE IF NOT EXISTS ".$dbname, $conn);
-			mysql_select_db($dbname, $conn);
+			mysqli_query("CREATE DATABASE IF NOT EXISTS ".$dbname, $conn);
+			mysqli_select_db($dbname, $conn);
 			
-			$result = mysql_query("SELECT major, minor, build, installed FROM `version` ORDER BY installed DESC LIMIT 1");
+			$result = mysqli_query("SELECT major, minor, build, installed FROM `version` ORDER BY installed DESC LIMIT 1");
 			
 			if($result != false)
 			{
-				while ($row = mysql_fetch_array($result, MYSQL_ASSOC))
+				while ($row = mysqli_fetch_array($result, MYSQL_ASSOC))
 				{
 					$db_major = $row['major'];
 					$db_minor = $row['minor'];
@@ -66,7 +66,7 @@ class Setup
 					$installed = $row['installed'];
 				}
 				
-				mysql_free_result($result);	
+				mysqli_free_result($result);	
 			}
 		}
 		
@@ -103,11 +103,11 @@ class Setup
 							$source = trim($source);
 							if( $source != "")
 							{
-								mysql_query($source) or die("Error setting up database.<br />\nFile: ".$updateScript."<br />\n".mysql_error());
+								mysqli_query($source) or die("Error setting up database.<br />\nFile: ".$updateScript."<br />\n".mysql_error());
 							}
 						}
 						
-						mysql_query("INSERT INTO `version` (installed, major, minor, build) VALUES ('$scriptDate', $db_major, $db_minor, $db_build)");	
+						mysqli_query("INSERT INTO `version` (installed, major, minor, build) VALUES ('$scriptDate', $db_major, $db_minor, $db_build)");	
 					}
 				}
 				
@@ -116,7 +116,7 @@ class Setup
 			}
 		}
 		
-		mysql_close($conn);	
+		mysqli_close($conn);	
 	}
 	
 	//test to check if config is writable
