@@ -51,8 +51,8 @@ class Setup
 		if($conn)
 		{
 			//If it doesn't exist, let's create the database
-			mysqli_query("CREATE DATABASE IF NOT EXISTS ".$dbname, $conn);
-			mysqli_select_db($dbname, $conn);
+			mysqli_query("CREATE DATABASE IF NOT EXISTS ".$dbname, $conn) or die("Error creating database: ".mysqli_error());
+			mysqli_select_db($dbname, $conn) or die("Error connecting to database: ".mysqli_error());
 			
 			$result = mysqli_query("SELECT major, minor, build, installed FROM `version` ORDER BY installed DESC LIMIT 1");
 			
